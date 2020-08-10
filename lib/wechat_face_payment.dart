@@ -13,7 +13,7 @@ class WechatFacePayment {
   }
 
   ///
-  /// 初始化 刷脸支付
+  /// 初始化 刷脸支付、人脸识别、实名认证
   ///
   static Future<String> initFacePay(
       String appId,
@@ -66,7 +66,7 @@ class WechatFacePayment {
   }
 
   ///
-  /// 释放资源
+  /// 释放刷脸支付资源
   ///
   static Future<String> get releaseWxPayFace async{
     final String msg = await _channel.invokeMethod('releaseWxPayFace');

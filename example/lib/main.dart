@@ -64,11 +64,15 @@ class _MyAppState extends State<MyApp> {
   /// 人脸识别模式。可选值：
   ///   FACEID-ONCE: 人脸识别(单次模式)
   ///   FACEID-LOOP: 人脸识别(循环模式)
+  ///   ONCE与LOOP的区别：
+  ///
+  ///   ONCE只会识别一次。 即调用本接口后， 如果在指定时间内（比如５秒）没有识别出来，则会返回识别失败。
+  ///   LOOP会持续识别人脸， 直到识别成功为止。（或者调用停止接口
   ///
   Future<void> startFacePay() async{
     String msg = '';
     try {
-      msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEID-ONCE");
+      msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEID-LOOP");
     } on PlatformException {
       _initFacePayMsg = 'Failed to get platform startFacePay.';
     }
