@@ -28,6 +28,7 @@ import javax.net.ssl.X509TrustManager
 public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
 
     private val PARAMS_FACE_AUTHTYPE = "face_authtype"
+    private val PARAMS_AUTH_CODE = "auth_code"
     private val PARAMS_APPID = "appid"
     private val PARAMS_SUB_APPID = "sub_appid"
     private val PARAMS_MCH_ID = "mch_id"
@@ -170,7 +171,9 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                         try {
                             val msg = "startCodeScanner, /\n return_code : $returnCode /\n return_msg : $returnMsg /\n code_msg: $codeMsg /\n err_code:$errCode";
                             Log.d(tag, "扫码完成:$msg")
-                            result.success(info);
+
+                            postReportPayCode(codeMsg);
+
                         } catch (e: IOException) {
                             e.printStackTrace()
                         }
@@ -363,7 +366,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
      *  face_sid : 用户身份信息查询凭证。获取方式见 [getWxpayfaceCode]
      */
     private fun getWxpayAuth(authInfo: String, face_sid: String) {
-        val params: HashMap<String, String> = HashMap<String, String>()
+        val params: HashMap<String, String> = HashMap()
         params[PARAMS_AUTHINFO] = authInfo
         params[PARAMS_FACE_SID] = face_sid
         WxPayFace.getInstance().getWxpayAuth(params, object : IWxPayfaceCallback() {
@@ -372,7 +375,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                 if (!isSuccessInfo(info)) {
                     return
                 }
-                Log.i(tag, "340 实名认证返回：$info");
+                Log.i(tag, "340 实名认证返回：$info")
                 getFaceMchUserInfo(face_sid);
             }
 
@@ -437,6 +440,25 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
             e.printStackTrace()
             throw RuntimeException(e)
         }
+    }
+
+    /**
+     * 付款码上报 reportPaycode
+     * 接口作用： 设备获取到微信付款码，而无法获取到商户号和订单号的可以通过此接口做交易上报
+     * auth_code: 微信支付18位付款码
+     */
+    private fun postReportPayCode(auth_code: String){
+        val params: HashMap<String, String> = HashMap()
+        params[PARAMS_AUTH_CODE] = auth_code
+        WxPayFace.getInstance().reportPaycode(params, object : IWxPayfaceCallback(){
+            override fun response(info: Map<*, *>) {
+                if (!isSuccessInfo(info)){
+                    return
+                }
+                Log.i(tag, "456 付款码上报返回：$info")
+            }
+
+        })
     }
 
 
