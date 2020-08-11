@@ -31,3 +31,37 @@
     
     
 [更多相关信息请查看微信刷脸支付官网](https://pay.weixin.qq.com/wiki/doc/wxfacepay/)
+
+
+## 安装
+1、添加依赖
+
+将此添加到项目的 pubspec.yaml 文件中：
+```
+ dependencies:
+   wechat_face_payment: 
+      git:
+        url:git://github.com/hqwlkj/wechat_face_payment.git
+```
+
+2、安装
+
+您可以从命令行安装软件包：
+
+使用Flutter：
+
+```
+ $ flutter pub get
+
+```
+
+或者，您的编辑器可能支持flutter pub get。 查看您的编辑器文档以了解更多信息。
+
+
+3、使用
+
+在Dart代码中，您可以使用：
+
+```
+import 'package:wechat_face_payment/wechat_face_payment.dart';
+```
