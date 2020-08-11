@@ -73,6 +73,7 @@ class _MyAppState extends State<MyApp> {
     String msg = '';
     try {
       msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEID-LOOP");
+      print('msg: $msg');
     } on PlatformException {
       _initFacePayMsg = 'Failed to get platform startFacePay.';
     }
