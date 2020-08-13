@@ -123,6 +123,16 @@ class _MyAppState extends State<MyApp> {
       _releaseFacePayMsg = msg;
     });
   }
+
+  Future<void> testWxPayFace()async{
+    WechatFacePayment wechatFacePayment = await WechatFacePayment.testWxPayFace;
+    if (!mounted) return;
+    setState(() {
+      _releaseFacePayMsg = wechatFacePayment.resultCode ?? '';
+    });
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -138,6 +148,11 @@ class _MyAppState extends State<MyApp> {
               SizedBox(height: 30),
               Text('Running on: $_initFacePayMsg\n'),
               FlatButton(
+                onPressed: () {
+                  testWxPayFace();
+                },
+                child: Text('testWxPayFace'),
+              ),FlatButton(
                 onPressed: () {
                   initFacePay();
                 },

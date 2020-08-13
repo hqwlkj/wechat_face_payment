@@ -131,6 +131,10 @@ public class WxPayFace {
         }
     }
 
+    public void showLoading(Context cxt){
+        new WxfacePayLoadingDialog(cxt).show();
+    }
+
     private synchronized void bindFaceService(Context cxt, Map info) {
         Intent intent = new Intent("com.tencent.faceservice");
         if (intent != null) {
