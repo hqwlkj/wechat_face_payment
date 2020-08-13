@@ -2,18 +2,21 @@ package com.parsec.wechat_face_payment
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.os.RemoteException
 import android.util.Log
 import androidx.annotation.NonNull
+import com.parsec.wechat_face_payment.handlers.WechatFacePaymentHandler
 import com.tencent.wxpayface.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 import okhttp3.*
-import org.json.JSONObject
 import java.io.IOException
 import java.security.SecureRandom
 import java.security.cert.CertificateException
@@ -21,11 +24,14 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 import javax.net.ssl.X509TrustManager
-import kotlin.concurrent.thread
 
 
 /** WechatFacePaymentPlugin */
-public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
+public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+
+//    private val registrar = PluginRegistry.Registrar
+
+    private val uiThreadHandler = Handler(Looper.getMainLooper())
 
     private val PARAMS_FACE_AUTHTYPE = "face_authtype"
     private val PARAMS_AUTH_CODE = "auth_code"
@@ -93,6 +99,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
 
         @JvmStatic
         fun registerWith(registrar: Registrar) {
+            WechatFacePaymentHandler.setContext(registrar.activity().applicationContext)
             val channel = MethodChannel(registrar.messenger(), "wechat_face_payment")
             channel.setMethodCallHandler(WechatFacePaymentPlugin())
         }
@@ -142,7 +149,6 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
      * 初始化微信刷脸支付
      */
     private fun initFacePay(@NonNull result: Result) {
-
         WxPayFace.getInstance().initWxpayface(context, object : IWxPayfaceCallback() {
             override fun response(info: MutableMap<Any?, Any?>?) {
                 if (!isSuccessInfo(info)) {
@@ -165,7 +171,8 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                     return
                 }
                 Log.d(tag, "微信刷脸支付初始化完成 开始启用 扫码支付")
-//                WxfacePayLoadingDialog(context).show()
+                if(WechatFacePaymentHandler.getContext() != null)
+                    WxfacePayLoadingDialog(WechatFacePaymentHandler.getContext()).show()
                 WxPayFace.getInstance().startCodeScanner(object : IWxPayfaceCallback() {
                     @Throws(RemoteException::class)
                     override fun response(info: Map<*, *>) {
@@ -173,6 +180,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                          *关闭扫码
                          */
                         WxPayFace.getInstance().stopCodeScanner()
+
                         val returnCode = info["return_code"].toString()
                         val errCode = info["err_code"].toString()
                         val returnMsg = info["return_msg"].toString() // 对错误码的描述
@@ -183,7 +191,10 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                         }
                         val msg = "startCodeScanner, /\n return_code : $returnCode /\n return_msg : $returnMsg /\n code_msg: $codeMsg /\n err_code:$errCode";
                         Log.d(tag, "扫码完成:$msg")
-                        postReportPayCode(codeMsg, result);
+                        uiThreadHandler.post(Runnable {
+                            result.success(info)
+                        })
+//                        postReportPayCode(codeMsg, result);
                     }
                 })
             }
@@ -195,28 +206,19 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
      * 接口作用：获取rawdata数据
      */
     private fun getWxPayFaceRawData(@NonNull result: Result) {
-        result.success("success")
-        Thread(Runnable { Handler().post {
-            /**
-             * https://pay.weixin.qq.com/wiki/doc/wxfacepay/develop/android/faceuser.html#_2%E3%80%81%E8%8E%B7%E5%8F%96%E6%95%B0%E6%8D%AE
-             */
-            WxPayFace.getInstance().getWxpayfaceRawdata(object : IWxPayfaceCallback() {
-                @Throws(RemoteException::class)
-                override fun response(info: Map<*, *>) {
-                    if (!isSuccessInfo(info)) {
-                        return
-                    }
-                    val rawData = info["rawdata"].toString()
-                    Log.d(tag, "取得RawData:$rawData")
-                    result.success(info)
-//                    try {
-//                        getWxPayFaceAuthInfo(rawData, result)
-//                    } catch (e: IOException) {
-//                        e.printStackTrace()
-//                    }
+        WxPayFace.getInstance().getWxpayfaceRawdata(object : IWxPayfaceCallback() {
+            @Throws(RemoteException::class)
+            override fun response(info: Map<*, *>) {
+                if (!isSuccessInfo(info)) {
+                    return
                 }
-            })
-        } }).start()
+                val rawData = info["rawdata"].toString()
+                Log.d(tag, "206 取得RawData:$rawData")
+                getWxPayFaceAuthInfo(rawData, result)
+            }
+        })
+
+
     }
 
     /**
@@ -275,12 +277,11 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                             }
 
                             Log.i(tag, "273 取得AuthInfo:$authInfo")
-
                             // 人脸识别
                             if (faceAuthType == "FACEID-LOOP" || faceAuthType == "FACEID-ONCE") {
                                 getWxPayFaceUserInfo(authInfo, result)
                             } else {
-                                getWxPayFaceCode(authInfo ,result)
+                                getWxPayFaceCode(authInfo, result)
                             }
                         }
                     })
@@ -312,11 +313,15 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
         WxPayFace.getInstance().getWxpayfaceUserInfo(params, object : IWxPayfaceCallback() {
             @Throws(RemoteException::class)
             override fun response(info: Map<*, *>) {
-                if(!isSuccessInfo(info)){
-                    result.error(info["return_code"].toString(), info["return_msg"].toString(), info)
-                }else{
+                if (!isSuccessInfo(info)) {
+                    uiThreadHandler.post(Runnable {
+                        result.error(info["return_code"].toString(), info["return_msg"].toString(), info)
+                    })
+                } else {
                     Log.i(tag, "321 获取用户信息： $info");
-                    result.success(info.toString())
+                    uiThreadHandler.post(Runnable {
+                        result.success(info)
+                    })
                 }
             }
 
@@ -338,6 +343,8 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
         params[PARAMS_OUT_TRADE_NO] = "" + System.currentTimeMillis() / 100000
         params[PARAMS_TOTAL_FEE] = totalFee
         params[PARAMS_TELEPHONE] = telPhone
+        params["ask_face_permit"] = "1"
+        params["face_code_type"] = "1"
         params[PARAMS_AUTHINFO] = authInfo
 
 
@@ -355,21 +362,11 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                         if (info[PARAMS_FACE_AUTHTYPE] == "FACE_AUTH") { // 实名认证
                             Log.i(tag, "350 开始获取认证信息_ face_sid: ${info["face_sid"].toString()}")
                             getWxPayAuth(authInfo, info["face_sid"].toString(), result)
-                        }else{
-                            thread {
-                                run {
-                                    val json : JSONObject = JSONObject()
-                                    json.put("return_code", info["return_code"].toString())
-                                    json.put("err_code", info["err_code"].toString())
-                                    json.put("return_msg", info["return_msg"].toString())
-                                    json.put("face_code", info["face_code"].toString())
-                                    json.put("sub_openid", info["sub_openid"].toString())
-                                    json.put("underage_state", info["underage_state"].toString())
-                                    Log.i(tag, "365 回调返回人脸识别结果(face_code, openid): face_code: ${info["face_code"]}  openid:${info["openid"]}")
-                                    Log.i(tag, "366 result: $json")
-                                    result.success(json.toString())
-                                }
-                            }
+                        } else {
+                            Log.i(tag, "366 result: $info")
+                            uiThreadHandler.post(Runnable {
+                                result.success(info)
+                            })
                         }
                     }
                     WxfacePayCommonCode.VAL_RSP_PARAMS_USER_CANCEL -> {
@@ -407,8 +404,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                     return
                 }
                 Log.i(tag, "340 用户同意授权：$info")
-//                result.success(face_sid);
-                getFaceMchUserInfo(face_sid)
+                getFaceMchUserInfo(face_sid, result)
             }
 
         })
@@ -419,7 +415,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
      * 接口地址：https://api.mch.weixin.qq.com/v3/facemch/users
      * 请求方式：GET
      */
-    private fun getFaceMchUserInfo(face_sid: String) {
+    private fun getFaceMchUserInfo(face_sid: String, @NonNull result: Result) {
         Log.i(tag, "用户授权成功，请求微信后台获取实名信息")
         var authInfo = "";
         try {
@@ -449,7 +445,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                     .hostnameVerifier { hostname, session -> true }
                     .build()
             val request = Request.Builder()
-                    .url("https://api.mch.weixin.qq.com/v3/facemch/users/$face_sid?appid=$appId&info_type=ASK_REAL_NAME") // ASK_UNIONID 、 ASK_REAL_NAME
+                    .url("https://api.mch.weixin.qq.com/v3/facemch/users/$face_sid?appid=$appId&face_sid=$face_sid&info_type=ASK_REAL_NAME") // ASK_UNIONID 、 ASK_REAL_NAME
                     .build()
             client.newCall(request)
                     .enqueue(object : Callback {
@@ -466,6 +462,9 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
                                 e.printStackTrace()
                             }
                             Log.i(tag, "取得users:$authInfo")
+//                            uiThreadHandler.post(Runnable {
+//                                result.success(info)
+//                            })
                         }
                     })
         } catch (e: Exception) {
@@ -473,28 +472,28 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
             throw RuntimeException(e)
         }
     }
-
-    /**
-     * 付款码上报 reportPaycode
-     * 接口作用： 设备获取到微信付款码，而无法获取到商户号和订单号的可以通过此接口做交易上报
-     * auth_code: 微信支付18位付款码
-     */
-    private fun postReportPayCode(auth_code: String, @NonNull result: Result){
-        val params: HashMap<String, String> = HashMap()
-        params[PARAMS_AUTH_CODE] = auth_code
-        thread {
-            WxPayFace.getInstance().reportPaycode(params, object : IWxPayfaceCallback(){
-                @Throws(RemoteException::class)
-                override fun response(info: Map<*, *>) {
-                    if (!isSuccessInfo(info)){
-                        return
-                    }
-                    Log.i(tag, "456 付款码上报返回：$info")
-                    result.success(info)
-                }
-            })
-        }.start()
-    }
+//
+//    /**
+//     * 付款码上报 reportPaycode
+//     * 接口作用： 设备获取到微信付款码，而无法获取到商户号和订单号的可以通过此接口做交易上报
+//     * auth_code: 微信支付18位付款码
+//     */
+//    private fun postReportPayCode(auth_code: String, @NonNull result: Result) {
+//        val params: HashMap<String, String> = HashMap()
+//        params[PARAMS_AUTH_CODE] = auth_code
+//        WxPayFace.getInstance().reportPaycode(params, object : IWxPayfaceCallback() {
+//            @Throws(RemoteException::class)
+//            override fun response(info: Map<*, *>) {
+//                if (!isSuccessInfo(info)) {
+//                    return
+//                }
+//                Log.i(tag, "456 付款码上报返回：$info")
+//                uiThreadHandler.post(Runnable {
+//                    result.success(info)
+//                })
+//            }
+//        })
+//    }
 
 
     private fun isSuccessInfo(info: Map<*, *>?): Boolean {
@@ -513,5 +512,21 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler {
         }
         Log.d(tag, "422 调用返回成功")
         return true
+    }
+
+    override fun onDetachedFromActivity() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
+        TODO("Not yet implemented")
+    }
+
+    override fun onAttachedToActivity(binding: ActivityPluginBinding) {
+        WechatFacePaymentHandler.setContext(binding.activity.applicationContext)
+    }
+
+    override fun onDetachedFromActivityForConfigChanges() {
+        TODO("Not yet implemented")
     }
 }

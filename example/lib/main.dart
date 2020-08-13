@@ -48,15 +48,10 @@ class _MyAppState extends State<MyApp> {
   /// FACEPAY_DELAY 延迟支付(提供商户号信息联系微信支付开通权限)
   ///
   Future<void> initFacePay() async{
-    String msg = '';
-    try {
-      msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEPAY");
-    } on PlatformException {
-      _initFacePayMsg = 'Failed to get platform initFacePay.';
-    }
+    WechatFacePayment msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEPAY");
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = msg;
+      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
     });
   }
 
@@ -70,16 +65,10 @@ class _MyAppState extends State<MyApp> {
   ///   LOOP会持续识别人脸， 直到识别成功为止。（或者调用停止接口
   ///
   Future<void> startFacePay() async{
-    String msg = '';
-    try {
-      msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEID-LOOP");
-      print('msg: $msg');
-    } on PlatformException {
-      _initFacePayMsg = 'Failed to get platform startFacePay.';
-    }
+    WechatFacePayment msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACEID-LOOP");
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = msg;
+      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
     });
   }
 
@@ -87,15 +76,10 @@ class _MyAppState extends State<MyApp> {
   ///  实名认证 FACE_AUTH
   ///
   Future<void> startFaceVerified() async{
-    String msg = '';
-    try {
-      msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACE_AUTH");
-    } on PlatformException {
-      _initFacePayMsg = 'Failed to get platform startFaceVerified.';
-    }
+    WechatFacePayment msg = await WechatFacePayment.initFacePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","FACE_AUTH");
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = msg;
+      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
     });
   }
 
@@ -104,15 +88,10 @@ class _MyAppState extends State<MyApp> {
   /// 该状态码为 插件自定义 WxPayFace 没有提供
   ///
   Future<void> startScanCodeToPay() async {
-    String msg = '';
-    try {
-      msg = await WechatFacePayment.initScanCodePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","SCAN_CODE");
-    } on PlatformException {
-      _initFacePayMsg = 'Failed to get platform startScanCodeToPay.';
-    }
+    WechatFacePayment msg = await WechatFacePayment.initScanCodePay("wx34aa1d8ffa545b06","1506994921","123455","","","13249817234123412343","1","SCAN_CODE");
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = msg;
+      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
     });
   }
 
