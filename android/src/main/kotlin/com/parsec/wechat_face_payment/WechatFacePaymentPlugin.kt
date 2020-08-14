@@ -29,8 +29,6 @@ import javax.net.ssl.X509TrustManager
 /** WechatFacePaymentPlugin */
 public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
-//    private val registrar = PluginRegistry.Registrar
-
     private val uiThreadHandler = Handler(Looper.getMainLooper())
 
     private val PARAMS_FACE_AUTHTYPE = "face_authtype"
@@ -56,8 +54,6 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
      * 微信刷脸SDK返回常量
      */
     private val RETURN_CODE = "return_code"
-    private val RETURN_SUCCESS = "SUCCESS"
-    private val RETURN_FAILE = "SUCCESS"
     private val RETURN_MSG = "return_msg"
 
     /*
@@ -404,7 +400,11 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                     return
                 }
                 Log.i(tag, "340 用户同意授权：$info")
-                getFaceMchUserInfo(face_sid, result)
+                params[RETURN_CODE] = info[RETURN_CODE].toString()
+                params[RETURN_MSG] = info[RETURN_MSG].toString()
+                uiThreadHandler.post(Runnable {
+                    result.success(params)
+                })
             }
 
         })
@@ -456,15 +456,24 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                         @Throws(IOException::class)
                         override fun onResponse(call: Call, response: Response) {
                             Log.i(tag, "391 取得users_response: $response");
+                            val params: HashMap<String, String> = HashMap()
                             try {
                                 authInfo = ReturnXMLParser.parseGetAuthInfoXML(response.body()!!.byteStream())
+                                Log.i(tag, "取得users:$authInfo")
+                                params[PARAMS_AUTHINFO] = authInfo
+                                params[RETURN_CODE] = "SUCCESS"
+                                uiThreadHandler.post(Runnable {
+                                    result.success(params)
+                                })
                             } catch (e: Exception) {
                                 e.printStackTrace()
+                                Log.i(tag, "取得users 异常")
+                                params[PARAMS_AUTHINFO] = ""
+                                params[RETURN_CODE] = "ERROR"
+                                uiThreadHandler.post(Runnable {
+                                    result.success(params)
+                                })
                             }
-                            Log.i(tag, "取得users:$authInfo")
-//                            uiThreadHandler.post(Runnable {
-//                                result.success(info)
-//                            })
                         }
                     })
         } catch (e: Exception) {

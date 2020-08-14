@@ -27,4 +27,25 @@ public class ReturnXMLParser {
 
         return result;
     }
+
+    public static String parsePayResultXML(InputStream is) throws  Exception{
+        String result=null;
+
+        XmlPullParser parser = Xml.newPullParser();
+        parser.setInput(is,"UTF-8");
+
+        int eventType = parser.getEventType();
+        while(eventType != XmlPullParser.END_DOCUMENT) {
+            switch (eventType) {
+                case XmlPullParser.START_TAG:
+                    if (parser.getName().equals("return_code")) {
+                        eventType = parser.next();
+                        result=parser.getText();
+                    }
+            }
+            eventType = parser.next();
+        }
+
+        return result;
+    }
 }
