@@ -147,7 +147,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
     private fun initFacePay(@NonNull result: Result) {
         WxPayFace.getInstance().initWxpayface(context, object : IWxPayfaceCallback() {
             override fun response(info: MutableMap<Any?, Any?>?) {
-                if (!isSuccessInfo(info)) {
+                if (!isSuccessInfo(info, result)) {
                     result.error(info?.get("RETURN_CODE").toString(), info?.get("RETURN_MSG").toString(), info)
                     return
                 }
@@ -163,7 +163,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
     private fun initScanCodePay(result: Result) {
         WxPayFace.getInstance().initWxpayface(context, object : IWxPayfaceCallback() {
             override fun response(info: MutableMap<Any?, Any?>?) {
-                if (!isSuccessInfo(info)) {
+                if (!isSuccessInfo(info, result)) {
                     return
                 }
                 Log.d(tag, "微信刷脸支付初始化完成 开始启用 扫码支付")
@@ -181,7 +181,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                         val errCode = info["err_code"].toString()
                         val returnMsg = info["return_msg"].toString() // 对错误码的描述
                         val codeMsg = info["code_msg"].toString() // 当扫码成功时返回扫码内容
-                        if (!isSuccessInfo(info)) {
+                        if (!isSuccessInfo(info, result)) {
                             result.error(errCode, returnMsg, info)
                             return
                         }
@@ -205,7 +205,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
         WxPayFace.getInstance().getWxpayfaceRawdata(object : IWxPayfaceCallback() {
             @Throws(RemoteException::class)
             override fun response(info: Map<*, *>) {
-                if (!isSuccessInfo(info)) {
+                if (!isSuccessInfo(info, result)) {
                     return
                 }
                 val rawData = info["rawdata"].toString()
@@ -309,12 +309,8 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
         WxPayFace.getInstance().getWxpayfaceUserInfo(params, object : IWxPayfaceCallback() {
             @Throws(RemoteException::class)
             override fun response(info: Map<*, *>) {
-                if (!isSuccessInfo(info)) {
-                    uiThreadHandler.post(Runnable {
-                        result.error(info["return_code"].toString(), info["return_msg"].toString(), info)
-                    })
-                } else {
-                    Log.i(tag, "321 获取用户信息： $info");
+                if (isSuccessInfo(info, result)) {
+                    Log.i(tag, "313 获取用户信息： $info");
                     uiThreadHandler.post(Runnable {
                         result.success(info)
                     })
@@ -347,7 +343,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
         WxPayFace.getInstance().getWxpayfaceCode(params, object : IWxPayfaceCallback() {
             @Throws(RemoteException::class)
             override fun response(info: Map<*, *>) {
-                if (!isSuccessInfo(info)) {
+                if (!isSuccessInfo(info, result)) {
                     return
                 }
                 Log.i(tag, "347 response | getWxPayFaceCode_RETURN_CODE: $info")
@@ -396,12 +392,12 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
             @Throws(RemoteException::class)
             override fun response(info: Map<*, *>) {
                 Log.i(tag, "336 实名认证返回")
-                if (!isSuccessInfo(info)) {
+                if (!isSuccessInfo(info, result)) {
                     return
                 }
-                Log.i(tag, "340 用户同意授权：$info")
                 params[RETURN_CODE] = info[RETURN_CODE].toString()
                 params[RETURN_MSG] = info[RETURN_MSG].toString()
+                Log.i(tag, "404 用户同意授权：$params")
                 uiThreadHandler.post(Runnable {
                     result.success(params)
                 })
@@ -505,7 +501,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
 //    }
 
 
-    private fun isSuccessInfo(info: Map<*, *>?): Boolean {
+    private fun isSuccessInfo(info: Map<*, *>?, @NonNull result: Result): Boolean {
         if (info == null) {
             Log.i(tag, "409 调用返回为空, 请查看日志")
             RuntimeException("调用返回为空").printStackTrace()
@@ -517,6 +513,9 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
         if (code == null || code != WxfacePayCommonCode.VAL_RSP_PARAMS_SUCCESS) {
             Log.i(tag, "418 调用返回非成功信息, 请查看日志")
             RuntimeException("调用返回非成功信息: $msg").printStackTrace()
+            uiThreadHandler.post(Runnable {
+                result.success(info)
+            })
             return false
         }
         Log.d(tag, "422 调用返回成功")

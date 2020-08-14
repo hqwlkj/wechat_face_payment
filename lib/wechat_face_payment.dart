@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class WechatFacePayment {
@@ -27,7 +28,7 @@ class WechatFacePayment {
       this.faceAuthType,
       this.subOpenid,
       this.underageState,
-        this.telephoneUsed,
+      this.telephoneUsed,
       this.subAppid,
       this.headImgurl,
       this.faceCode,
@@ -45,7 +46,7 @@ class WechatFacePayment {
 
   ///
   /// 初始化 刷脸支付、人脸识别、实名认证
-  ///
+  /// 更多参数说明查看  https://pay.weixin.qq.com/wiki/doc/wxfacepay/develop/android/facepay.html
   static Future<WechatFacePayment> initFacePay(
       String appId,
       String mchId,
