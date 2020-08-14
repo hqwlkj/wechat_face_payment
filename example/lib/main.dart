@@ -30,6 +30,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       platformVersion = await WechatFacePayment.platformVersion;
+      WechatFacePayment.hidePayLoadingDialog();
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -163,7 +164,16 @@ class _MyAppState extends State<MyApp> {
                   releaseWxpayface();
                 },
                 child: Text('释放资源，这步需要在组件销毁的时候调用'),
-              ),
+              ),FlatButton(
+                onPressed: () {
+                  WechatFacePayment.showPayLoadingDialog();
+                  /// 3 秒后自动关闭
+                  Future.delayed(Duration(milliseconds: 3000),(){
+                    WechatFacePayment.hidePayLoadingDialog();
+                  });
+                },
+                child: Text('showPayLoading'),
+              )
             ],
           ),
         ),

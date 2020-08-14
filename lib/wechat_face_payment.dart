@@ -144,4 +144,14 @@ class WechatFacePayment {
         await _channel.invokeMapMethod<String, dynamic>('testFacePay');
     return WechatFacePayment(resultCode: map['result_code']);
   }
+
+  /// 开启 loading
+  static Future<void> showPayLoadingDialog() async {
+    await _channel.invokeMethod('showPayLoading');
+  }
+
+  /// 关闭 loading
+  static Future<void> hidePayLoadingDialog() async {
+    await _channel.invokeMethod('hidePayLoading');
+  }
 }
