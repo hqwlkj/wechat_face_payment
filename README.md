@@ -1,5 +1,10 @@
 # wechat_face_payment
 
+[![pub package](https://img.shields.io/pub/v/wechat_face_payment.svg)](https://pub.dartlang.org/packages/wechat_face_payment)
+[![GitHub Stars](https://img.shields.io/github/stars/hqwlkj/wechat_face_payment.svg?logo=github)](https://github.com/hqwlkj/wechat_face_payment)
+[![Platform](https://img.shields.io/badge/platform-android-green.svg)](https://img.shields.io/badge/platform-Android-green.svg)
+
+
 微信刷脸支付、刷脸认证、扫码支持等 Flutter 插件。
 
 ## 说明
