@@ -129,7 +129,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                 hideDialog()
             }
             "releaseWxPayFace" -> { //  释放资源
-                WxPayFace.getInstance().releaseWxpayface(context);
+                WxPayFace.getInstance().releaseWxpayface(WechatFacePaymentHandler.getContext());
                 result.success("SUCCESS")
             }
             "testFacePay" -> { // 测试返回信息
@@ -192,7 +192,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                              *释放资源
                              *
                              */
-                            WxPayFace.getInstance().releaseWxpayface(context)
+                            WxPayFace.getInstance().releaseWxpayface(WechatFacePaymentHandler.getContext())
                             if (isSuccessInfo(info)) {
                                 Log.d(tag, "扫码完成:$info")
                                 uiThreadHandler.post(Runnable {
