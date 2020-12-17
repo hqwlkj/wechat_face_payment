@@ -18,6 +18,9 @@ rootProject.allprojects {
     repositories {
         google()
         jcenter()
+        flatDir {
+            dirs project(':wechat_face_payment').file('libs') // wechat_face_payment
+        }
     }
 }
 
@@ -39,6 +42,10 @@ android {
 }
 
 dependencies {
-    implementation 'com.squareup.okhttp3:okhttp:3.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'], exclude: [])
+    implementation (name:'wxfacepay-release', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlin_version}"
+    implementation 'androidx.annotation:annotation:1.1.0'
+    implementation 'com.google.code.gson:gson:2.8.6'
 }
