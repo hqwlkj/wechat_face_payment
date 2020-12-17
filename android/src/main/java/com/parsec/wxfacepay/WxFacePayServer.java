@@ -121,8 +121,11 @@ public class WxFacePayServer {
                 } else {
                     FaceResult faceResult = new FaceResult();
                     String return_code = (String) info.get("return_code");
-                    faceResult.setReturn_msg(new Gson().toJson(mFaceMap));
+                    String return_msg = (String) info.get("return_msg");
+                    String code_msg = (String) info.get("code_msg");
+                    faceResult.setReturn_msg(return_msg);
                     faceResult.setReturn_code(return_code);
+                    faceResult.setCode_msg(code_msg);
                     faceResultToH5(faceResult, callback);
                 }
             }
@@ -152,7 +155,7 @@ public class WxFacePayServer {
                 }
 
                 @Override
-                public void onResponse(Call call, Response response) throws IOException {
+                public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
                     String payVoucher = response.body().string();
                     LoggerUtil.i("获取到的微信支付凭证:" + payVoucher);
                     try {

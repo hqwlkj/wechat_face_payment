@@ -12,6 +12,7 @@ public class FaceResult implements Serializable {
     private static final long serialVersionUID = 80441988761998892L;
     private String return_code;
     private String return_msg;
+    private String code_msg;
     private String face_sid;
     private String face_code;
     private String openid;
@@ -48,6 +49,14 @@ public class FaceResult implements Serializable {
 
     public void setOpenid(String openid) {
         this.openid = openid;
+    }
+
+    public String getCodeMsg() {
+        return code_msg;
+    }
+
+    public void setCode_msg(String code_msg) {
+        this.code_msg = code_msg;
     }
 
 
