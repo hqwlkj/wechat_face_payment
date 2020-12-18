@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class WechatFacePayment {
@@ -51,23 +50,14 @@ class WechatFacePayment {
       String appId,
       String mchId,
       String storeId,
-      String telPhone,
-      String openId,
-      String outTradeNo,
-      String totalFee,
-      String faceAuthType) async {
+      String serverPath) async {
     final Map<String, dynamic> map =
         await _channel.invokeMapMethod('initFacePay', {
       "appId": appId,
       "mchId": mchId,
       "storeId": storeId,
-      "telPhone": telPhone,
-      "openId": openId,
-      "outTradeNo": outTradeNo,
-      "totalFee": totalFee,
-      "faceAuthType": faceAuthType,
+      "serverPath": serverPath
     });
-    print(map);
     return WechatFacePayment(
       resultCode: map['code'],
       returnMsg: map['message']
@@ -81,6 +71,7 @@ class WechatFacePayment {
     return result;
   }
 
+  /// 人脸支付
   static Future<Map<String, dynamic>> wxFacePay() async {
     final Map<String, dynamic> result = await _channel.invokeMapMethod('wxFacePay');
     return result;

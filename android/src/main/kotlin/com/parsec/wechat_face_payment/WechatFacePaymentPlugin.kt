@@ -7,6 +7,7 @@ import android.util.Log
 import androidx.annotation.NonNull
 import com.parsec.wechat_face_payment.handlers.WechatFacePaymentHandler
 import com.parsec.wxfacepay.utils.ICallback
+import com.parsec.wxfacepay.utils.LoggerUtil
 import com.parsec.wxfacepay.utils.WxFaceUtil
 import com.tencent.wxpayface.*
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -55,11 +56,8 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
     private lateinit var appId: String //商户公众号或小程序APPIdD
     private lateinit var mchId: String //商户ID
     private lateinit var storeId: String // 店铺ID
-    private lateinit var telPhone: String //用户手机号
-    private lateinit var openId: String //用户微信OPENID
-    private lateinit var outTradeNo: String //外部订单号
-    private lateinit var totalFee: String // 支付金额
-    private lateinit var faceAuthType: String //FACEPAY 人脸凭证  FACEPAY_DELAY 延迟支付 FACE_AUTH 实名认证 FACEID-ONCE 人脸识别(单次模式) FACEID-LOOP 人脸识别(循环模式) SCAN_CODE  扫码支付
+    private lateinit var serverPath: String // 服务器地址
+
 
     /// The MethodChannel that will the communication between Flutter and native Android
     ///
@@ -104,15 +102,9 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                 appId = call.argument<String>("appId")!!
                 mchId = call.argument<String>("mchId")!!
                 storeId = call.argument<String>("storeId")!!
-                telPhone = call.argument<String>("telPhone")!!
-                openId = call.argument<String>("openId")!!
-                outTradeNo = call.argument<String>("outTradeNo")!!
-                totalFee = call.argument<String>("totalFee")!!
-                faceAuthType = call.argument<String>("faceAuthType")!!
+                serverPath = call.argument<String>("serverPath")!!
+                LoggerUtil.i("serverPath:$serverPath");
                 initWxpayface(result)
-            }
-            "initScanCodePay" -> { //  扫码支付
-//                initScanCodePay(result);
             }
             "faceVerified" -> {
                 faceRecognition(result)
@@ -156,13 +148,13 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
         channel.setMethodCallHandler(null)
     }
 
-    private fun showDialog(){
-        Log.i(tag, "showDialog" +WechatFacePaymentHandler.getContext())
+    private fun showDialog() {
+        Log.i(tag, "showDialog" + WechatFacePaymentHandler.getContext())
         WechatFacePaymentHandler.showDialog()
     }
 
-    private fun hideDialog(){
-        Log.i(tag, "hideDialog" +WechatFacePaymentHandler.getContext())
+    private fun hideDialog() {
+        Log.i(tag, "hideDialog" + WechatFacePaymentHandler.getContext())
         WechatFacePaymentHandler.hideDialog()
     }
 
@@ -183,7 +175,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
      * 人脸识别
      */
     private fun faceRecognition(@NonNull result: Result) {
-        WxFaceUtil.InfoVer(WechatFacePaymentHandler.getContext(), object : ICallback {
+        WxFaceUtil.InfoVer(WechatFacePaymentHandler.getContext(), serverPath, object : ICallback {
             override fun callback(params: MutableMap<String, Any>?) {
                 uiThreadHandler.post {
                     result.success(params)
@@ -196,7 +188,7 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
      * 支付
      */
     private fun wxFacePay(@NonNull result: Result) {
-        WxFaceUtil.FacePay(WechatFacePaymentHandler.getContext(), "", object : ICallback {
+        WxFaceUtil.FacePay(WechatFacePaymentHandler.getContext(), serverPath, object : ICallback {
             override fun callback(params: MutableMap<String, Any>?) {
                 uiThreadHandler.post {
                     result.success(params)

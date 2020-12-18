@@ -35,15 +35,8 @@ import okhttp3.Response;
  */
 public class WxFaceVerServer {
 
-    //初始化微信人脸支付
-    public static final String FACE_PAY_INIT = "com.ysf.wx.initWxpayface";
-    //获取微信人脸支付rawdata
-    public static final String FACE_PAY_RAW_DATA = "com.ysf.wx.getWxpayfaceRawdata";
-    //微信人脸支付刷脸获取face_code
-    public static final String FACE_PAY_FACE_CODE = "com.ysf.wx.getWxpayfaceCode";
 
-    //
-    private String mRawData; //微信sdk返回的验证信息
+    private String server_path = WxConstant.BASE_URL;
     private long anInt = 0L;
     private OkHttpClient client = new OkHttpClient.Builder()
             .connectTimeout(12, TimeUnit.SECONDS)
@@ -95,8 +88,9 @@ public class WxFaceVerServer {
     }
 
     //第二步 获取RawData
-    public void getWxPayFaceRawData(Context context, final ICallback callback) {
+    public void getWxPayFaceRawData(Context context,String serverPath, final ICallback callback) {
         anInt = System.currentTimeMillis();
+        server_path = serverPath; // 重新赋值 服务器路径
         WxPayFace.getInstance().getWxpayfaceRawdata(new IWxPayfaceCallback() {
             @Override
             public void response(Map map) throws RemoteException {
@@ -136,7 +130,7 @@ public class WxFaceVerServer {
      */
     private void getWxPayFaceAuthInfo(String mRawData, final ICallback callback) {
         try {
-            String path = WxConstant.BASE_URL + "wechat/getWxFaceAuthInfo?dev_id="
+            String path = server_path + "/wechat/getWxFaceAuthInfo?dev_id="
                     + android.os.Build.SERIAL + "&raw_data=" + URLEncoder.encode(mRawData, "utf-8") + "&his_cd=1";
             LoggerUtil.i("请求地址："+ path);
             Request request = new Request.Builder()

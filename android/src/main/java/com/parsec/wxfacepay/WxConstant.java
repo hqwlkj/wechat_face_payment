@@ -9,8 +9,8 @@ public class WxConstant {
     public static final String getFacePay = "https://api.mch.weixin.qq.com/pay/facepay";
 
     //正式环境
-    public static final String BASE_URL= "https://mp.hipay365.com/";
-//    public static final String BASE_URL= "http://parsec.cqkqinfo.com/app/stage-exhibition-api/face/";
+    public static final String BASE_URL= "https://mp.hipay365.com";
+//    public static final String BASE_URL= "http://parsec.cqkqinfo.com/app/stage-exhibition-api/face";
 
 
     /*人脸支付  返回码*/

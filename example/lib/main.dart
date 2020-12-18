@@ -47,19 +47,14 @@ class _MyAppState extends State<MyApp> {
   }
 
   ///
-  /// FACEPAY 人脸凭证，常用于人脸支付
-  /// FACEPAY_DELAY 延迟支付(提供商户号信息联系微信支付开通权限)
+  /// 初始化面部识别插件
   ///
   Future<void> initFacePay() async {
     WechatFacePayment msg = await WechatFacePayment.initFacePay(
         "wx34aa1d8ffa545b06",
         "1506994921",
         "123455",
-        "",
-        "",
-        "13249817234123412343",
-        "1",
-        "FACEPAY");
+        "http://parsec.cqkqinfo.com/app/stage-exhibition-api/face");
     if (!mounted) return;
     print(msg);
     setState(() {
@@ -67,61 +62,26 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  ///
+  /// 人脸识别
+  ///
   Future<void> wxFaceVerify() async {
     final Map<String, dynamic> result = await WechatFacePayment.wxFaceVerify();
     print('==========wxFaceVerify=============');
     print(result);
   }
 
+
+  ///
+  /// 面部支付
+  ///
   Future<void> wxFacePay() async {
     final Map<String, dynamic> result = await WechatFacePayment.wxFacePay();
     print('===========wxFacePay============');
     print(result);
   }
 
-  ///
-  /// 人脸识别模式。可选值：
-  ///   FACEID-ONCE: 人脸识别(单次模式)
-  ///   FACEID-LOOP: 人脸识别(循环模式)
-  ///   ONCE与LOOP的区别：
-  ///
-  ///   ONCE只会识别一次。 即调用本接口后， 如果在指定时间内（比如５秒）没有识别出来，则会返回识别失败。
-  ///   LOOP会持续识别人脸， 直到识别成功为止。（或者调用停止接口
-  ///
-  Future<void> startFacePay() async {
-    WechatFacePayment msg = await WechatFacePayment.initFacePay(
-        "wx34aa1d8ffa545b06",
-        "1506994921",
-        "123455",
-        "",
-        "",
-        "13249817234123412343",
-        "1",
-        "FACEID-LOOP");
-    if (!mounted) return;
-    setState(() {
-      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
-    });
-  }
 
-  ///
-  ///  实名认证 FACE_AUTH
-  ///
-  Future<void> startFaceVerified() async {
-    WechatFacePayment msg = await WechatFacePayment.initFacePay(
-        "wx34aa1d8ffa545b06",
-        "1506994921",
-        "123455",
-        "",
-        "",
-        "13249817234123412343",
-        "1",
-        "FACE_AUTH");
-    if (!mounted) return;
-    setState(() {
-      _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
-    });
-  }
 
   ///
   /// 扫码
@@ -134,6 +94,9 @@ class _MyAppState extends State<MyApp> {
     await WechatFacePayment.wxStopCodeScanner;
   }
 
+  ///
+  /// 释放人脸插件
+  ///
   Future<void> releaseWxpayface() async {
     String msg = await WechatFacePayment.releaseWxPayFace;
     if (!mounted) return;
@@ -144,6 +107,9 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  ///
+  /// 测试插件
+  ///
   Future<void> testWxPayFace() async {
     WechatFacePayment wechatFacePayment = await WechatFacePayment.testWxPayFace;
     if (!mounted) return;

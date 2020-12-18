@@ -24,28 +24,24 @@ public class WxFaceUtil {
 
     /**
      * 刷脸实名
+     * @param context
+     * @param serverPath
+     * @param callback
      */
-    public static void InfoVer(Context context, final ICallback callback) {
+    public static void InfoVer(Context context,String serverPath, final ICallback callback) {
         WxFaceVerServer wxFaceVerServer = new WxFaceVerServer();
-        wxFaceVerServer.getWxPayFaceRawData(context, callback);
+        wxFaceVerServer.getWxPayFaceRawData(context, serverPath, callback);
     }
 
     /**
      * 刷脸支付
-     * @param faceJson
+     * @param context
+     * @param serverPath
+     * @param callback
      */
-    public static void FacePay(Context context, String faceJson, final ICallback callback) {
-//        WxFaceVerServer wxFaceVerServer = new WxFaceVerServer();
-//        //将json转成map
-//        HashMap<String, String> hashMap =new HashMap<>();
-//        Map<String, Object> map = new Gson().fromJson(faceJson ,new TypeToken<Map<String, Object>>(){}.getType());
-//        for (String key:map.keySet()) {
-//            String value = (String) map.get(key);
-//            hashMap.put(key,value);
-//        }
-//        wxFaceVerServer.getWxpayfaceCode(hashMap,callback);
+    public static void FacePay(Context context, String serverPath, final ICallback callback) {
         WxFacePayServer wxFacePayServer = new WxFacePayServer();
-        wxFacePayServer.getWxPayFaceRawData(context, callback);
+        wxFacePayServer.getWxPayFaceRawData(context, serverPath, callback);
     }
 
 
