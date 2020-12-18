@@ -217,7 +217,7 @@ public class WxFacePayServer {
             public void response(final Map map) {
                 final String code = (String) map.get(WxConstant.RETURN_CODE);
                 String message = (String) map.get(WxConstant.RETURN_MSG);
-                LoggerUtil.i(code + "-176-" + message);
+                LoggerUtil.i(code + "-220-" + message);
                 LoggerUtil.i(new Gson().toJson(map));
                 FaceResult faceResult = new FaceResult();
                 if (!Tools.isSuccessInfo(map)) {
@@ -294,9 +294,6 @@ public class WxFacePayServer {
      */
     private void WxFacePayfor(final ICallback callback) {
         try {
-            LoggerUtil.i(face_code);
-            LoggerUtil.i(openid);
-            LoggerUtil.i(anInt + "");
             RequestBody requestBody = new FormBody.Builder()
                     .add("face_code", URLEncoder.encode(face_code, "utf-8"))
                     .add("his_cd", "2")
@@ -315,7 +312,7 @@ public class WxFacePayServer {
             RequestBody body = RequestBody.create(JSON, new Gson().toJson(facePayResq));
 
             Request request = new Request.Builder()
-                    .url(WxConstant.BASE_URL + "wechat/facePay")
+                    .url(server_path + "/wechat/facePay")
                     .post(body)
                     .build();
             client.newCall(request).enqueue(new Callback() {
@@ -373,16 +370,9 @@ public class WxFacePayServer {
                 String returnCode = map.get(WxConstant.RETURN_CODE).toString();
                 String returnMsg = map.get(WxConstant.RETURN_MSG).toString();
                 LoggerUtil.i("支付结果查询：" + returnCode + "---" + returnMsg);
-
                 FaceResult faceResult = new FaceResult();
                 faceResult.setReturn_code(returnCode);
                 faceResult.setReturn_msg(returnMsg);
-//                if ("SUCCESS".equals(returnCode)) {
-//
-//                    //finish();
-//                } else {
-//                    //支付失败
-//                }
                 faceResultToH5(faceResult, callback);
             }
         });

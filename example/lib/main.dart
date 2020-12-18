@@ -56,7 +56,6 @@ class _MyAppState extends State<MyApp> {
         "123455",
         "http://parsec.cqkqinfo.com/app/stage-exhibition-api/face");
     if (!mounted) return;
-    print(msg);
     setState(() {
       _initFacePayMsg = '${msg.resultCode}_${msg.returnMsg}';
     });
