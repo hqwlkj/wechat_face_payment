@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
 
 class WechatFacePayment {
@@ -45,87 +44,52 @@ class WechatFacePayment {
   }
 
   ///
-  /// 初始化 刷脸支付、人脸识别、实名认证
+  /// 初始化
   /// 更多参数说明查看  https://pay.weixin.qq.com/wiki/doc/wxfacepay/develop/android/facepay.html
   static Future<WechatFacePayment> initFacePay(
       String appId,
       String mchId,
       String storeId,
-      String telPhone,
-      String openId,
-      String outTradeNo,
-      String totalFee,
-      String faceAuthType) async {
+      String serverPath) async {
     final Map<String, dynamic> map =
         await _channel.invokeMapMethod('initFacePay', {
       "appId": appId,
       "mchId": mchId,
       "storeId": storeId,
-      "telPhone": telPhone,
-      "openId": openId,
-      "outTradeNo": outTradeNo,
-      "totalFee": totalFee,
-      "faceAuthType": faceAuthType,
+      "serverPath": serverPath
     });
     return WechatFacePayment(
-      resultCode: map['return_code'],
-      returnMsg: map['return_msg'],
-      nickname: map['nickname'],
-      headImgurl: map['head_imgurl'],
-      subAppid: map['sub_appid'],
-      subOpenid: map['sub_openid'],
-      faceAuthType: map['face_authtype'],
-      faceCode: map['face_code'],
-      faceSid: map['face_sid'],
-      underageState: map['underage_state'],
-      telephoneUsed: map['telephone_used'],
-      openid: map['openid'],
-      token: map['token'],
-      unionidMsg: map['unionid_msg'],
-      unionidCode: map['unionid_code'],
+      resultCode: map['code'],
+      returnMsg: map['message']
     );
   }
 
+
+  /// 人脸识别获取 face_sid 和 opneid
+  static Future<Map<String, dynamic>> wxFaceVerify() async {
+    final Map<String, dynamic> result = await _channel.invokeMapMethod('faceVerified');
+    return result;
+  }
+
+  /// 人脸支付
+  static Future<Map<String, dynamic>> wxFacePay() async {
+    final Map<String, dynamic> result = await _channel.invokeMapMethod('wxFacePay');
+    return result;
+  }
+
   ///
-  /// 初始化 扫码支付
+  /// 微信扫码
   ///
-  static Future<WechatFacePayment> initScanCodePay(
-      String appId,
-      String mchId,
-      String storeId,
-      String telPhone,
-      String openId,
-      String outTradeNo,
-      String totalFee,
-      String faceAuthType) async {
-    final Map<String, dynamic> map =
-        await _channel.invokeMapMethod('initScanCodePay', {
-      "appId": appId,
-      "mchId": mchId,
-      "storeId": storeId,
-      "telPhone": telPhone,
-      "openId": openId,
-      "outTradeNo": outTradeNo,
-      "totalFee": totalFee,
-      "faceAuthType": faceAuthType,
-    });
-    return WechatFacePayment(
-      resultCode: map['return_code'],
-      returnMsg: map['return_msg'],
-      nickname: map['nickname'],
-      headImgurl: map['head_imgurl'],
-      subAppid: map['sub_appid'],
-      subOpenid: map['sub_openid'],
-      faceAuthType: map['face_authtype'],
-      faceCode: map['face_code'],
-      faceSid: map['face_sid'],
-      underageState: map['underage_state'],
-      telephoneUsed: map['telephone_used'],
-      openid: map['openid'],
-      token: map['token'],
-      unionidMsg: map['unionid_msg'],
-      unionidCode: map['unionid_code'],
-    );
+  static Future<Map<String, dynamic>> wxScanCode() async {
+    final Map<String, dynamic> result = await _channel.invokeMapMethod('wxScanCode');
+    return result;
+  }
+
+  ///
+  /// 关闭扫码
+  ///
+  static Future<void> get wxStopCodeScanner async {
+    await _channel.invokeMethod('wxStopCodeScanner');
   }
 
   ///
