@@ -8,7 +8,7 @@
 微信刷脸支付、刷脸认证、扫码支持等 Flutter 插件。
 
 ## 说明
-该插件目前官方只提供了 Android SDK 和 Windows SDK  的文档，为提供IOS SDK 的文档，所以 [wechat_face_payment](https://github.com/hqwlkj/wechat_face_payment.git)  插件目前仅支持 Android 设备使用
+该插件目前官方只提供了 Android SDK 和 Windows SDK 的文档，未提供IOS SDK 的文档，所以 [wechat_face_payment](https://github.com/hqwlkj/wechat_face_payment.git)  插件目前仅支持 Android 设备使用
 
 ## 功能
 [刷脸支付](https://pay.weixin.qq.com/wiki/doc/wxfacepay/develop/android/facepay.html)
