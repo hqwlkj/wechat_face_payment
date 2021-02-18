@@ -10,7 +10,7 @@ import java.io.Serializable;
 public class FacePayResq implements Serializable {
 
     private String face_code;
-    private String his_cd;
+    private String order_title;
     private String open_id;
     private String total_fee;
     private String order_id;
@@ -32,12 +32,12 @@ public class FacePayResq implements Serializable {
         this.face_code = face_code;
     }
 
-    public String getHis_cd() {
-        return his_cd;
+    public String getOrder_title() {
+        return order_title;
     }
 
-    public void setHis_cd(String his_cd) {
-        this.his_cd = his_cd;
+    public void setOrder_title(String order_title) {
+        this.order_title = order_title;
     }
 
     public String getOpen_id() {

@@ -75,7 +75,10 @@ class _MyAppState extends State<MyApp> {
   /// 面部支付
   ///
   Future<void> wxFacePay() async {
-    final Map<String, dynamic> result = await WechatFacePayment.wxFacePay();
+    final Map<String, dynamic> result = await WechatFacePayment.wxFacePay(
+      "332b3f18-8da7-4c90-8eba-b3785e417ffb",
+      "UfMG4yYKusvYQffSP1xCLH10Ahqy0EZG", "测试面部支付","TEST1217752501201407033233368018", '1'
+    );
     print('===========wxFacePay============');
     print(result);
   }
