@@ -68,22 +68,29 @@ class _MyAppState extends State<MyApp> {
     final Map<String, dynamic> result = await WechatFacePayment.wxFaceVerify();
     print('==========wxFaceVerify=============');
     print(result);
+    if (!mounted) return;
+    setState(() {
+      _initFacePayMsg = '${result['code']}_${result['message']}';
+    });
   }
-
 
   ///
   /// 面部支付
   ///
   Future<void> wxFacePay() async {
     final Map<String, dynamic> result = await WechatFacePayment.wxFacePay(
-      "332b3f18-8da7-4c90-8eba-b3785e417ffb",
-      "UfMG4yYKusvYQffSP1xCLH10Ahqy0EZG", "测试面部支付","TEST1217752501201407033233368018", '1'
-    );
+        "332b3f18-8da7-4c90-8eba-b3785e417ffb",
+        "UfMG4yYKusvYQffSP1xCLH10Ahqy0EZG",
+        "测试面部支付",
+        "TEST1217752501201407033233368018",
+        '1');
     print('===========wxFacePay============');
     print(result);
+    if (!mounted) return;
+    setState(() {
+      _initFacePayMsg = '${result['code']}_${result['message']}';
+    });
   }
-
-
 
   ///
   /// 扫码
@@ -134,8 +141,9 @@ class _MyAppState extends State<MyApp> {
               Text('Running on: $_platformVersion\n'),
               SizedBox(height: 30),
               Text('Running on: $_initFacePayMsg\n'),
-              FlatButton(
-                color: Colors.grey,
+              TextButton(
+                style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Colors.deepPurpleAccent[400]), foregroundColor: MaterialStateProperty.all(Colors.white)),
                 onPressed: () {
                   testWxPayFace();
                 },
@@ -143,8 +151,10 @@ class _MyAppState extends State<MyApp> {
               ),
               Text('testWxPayFace: $_testWxPayFaceMsg\n',
                   style: TextStyle(color: Colors.redAccent)),
-              FlatButton(
-                color: Colors.amberAccent,
+              TextButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.amberAccent)),
                 onPressed: () {
                   initFacePay();
                 },
@@ -155,16 +165,22 @@ class _MyAppState extends State<MyApp> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  FlatButton(
-                    color: Colors.amberAccent[400],
+                  TextButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.blueAccent),
+                        foregroundColor:
+                            MaterialStateProperty.all(Colors.white)),
                     onPressed: () {
                       wxFaceVerify();
                     },
                     child: Text('人脸识别'),
                   ),
                   SizedBox(width: 20),
-                  FlatButton(
-                    color: Colors.amberAccent[400],
+                  TextButton(
+                    style: ButtonStyle(
+                        backgroundColor:
+                            MaterialStateProperty.all(Colors.amberAccent[400])),
                     onPressed: () {
                       wxFacePay();
                     },
@@ -173,8 +189,10 @@ class _MyAppState extends State<MyApp> {
                 ],
               ),
               SizedBox(height: 20),
-              FlatButton(
-                color: Colors.green[500],
+              TextButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.green[500])),
                 onPressed: () {
                   startScanCodeToPay();
                 },
@@ -183,15 +201,17 @@ class _MyAppState extends State<MyApp> {
               SizedBox(height: 20),
               Text('releaseWxpayface: $_releaseFacePayMsg\n',
                   style: TextStyle(color: Colors.redAccent)),
-              FlatButton(
-                color: Colors.redAccent[400],
+              TextButton(
+                style: ButtonStyle(
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.redAccent[400])),
                 onPressed: () {
                   releaseWxpayface();
                 },
                 child: Text('释放资源，这步需要在组件销毁的时候调用',
                     style: TextStyle(color: Colors.white)),
               ),
-              FlatButton(
+              OutlinedButton(
                 onPressed: () {
                   WechatFacePayment.showPayLoadingDialog();
 

@@ -1,3 +1,12 @@
+## [0.0.7+1] - [2022-05-13]
+* 升级微信支付 `Android SDK` 到 `v2.32.105`
+* 升级 `gradle` 版本到 `gradle-7.2-all`
+* 升级项目其他依赖的版本等
+* 新增 `DEMO` 人脸识别、面部支付 异常时的错误信息展示
+* 修复 `DEMO` 中过时的代码
+* 修复 [Upgrading pre 1.12 Android projects](https://github.com/flutter/flutter/wiki/Upgrading-pre-1.12-Android-projects)
+
+
 ## [0.0.6+2] - [2021-02-18]
 * 修复获取人脸数据请求超时未返回异常结果BUG
 

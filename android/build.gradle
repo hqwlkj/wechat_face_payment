@@ -2,14 +2,14 @@ group 'com.parsec.wechat_face_payment'
 version '1.0-SNAPSHOT'
 
 buildscript {
-    ext.kotlin_version = '1.3.50'
+    ext.kotlin_version = '1.6.21'
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.5.0'
+        classpath 'com.android.tools.build:gradle:4.1.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
     }
 }
@@ -17,7 +17,7 @@ buildscript {
 rootProject.allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         flatDir {
             dirs project(':wechat_face_payment').file('libs') // wechat_face_payment
         }
@@ -28,24 +28,31 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 31
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
     }
+
     defaultConfig {
-        minSdkVersion 25
-    }
-    lintOptions {
-        disable 'InvalidPackage'
+        minSdkVersion 16
     }
 }
 
 dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'], exclude: [])
-    implementation (name:'wxfacepay-release', ext: 'aar')
+    implementation (name:'wxfacepay-release-2.32.105', ext: 'aar')
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:${kotlin_version}"
-    implementation 'androidx.annotation:annotation:1.1.0'
-    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'androidx.annotation:annotation:1.2.0'
+    implementation 'com.google.code.gson:gson:2.8.9'
 }
