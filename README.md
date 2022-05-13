@@ -48,6 +48,13 @@
       git:
         url:git://github.com/hqwlkj/wechat_face_payment.git
 ```
+或者
+
+```
+ dependencies:
+   wechat_face_payment: version
+```
+查看[最新的版本](https://pub.flutter-io.cn/packages/wechat_face_payment/install)；
 
 2、安装
 

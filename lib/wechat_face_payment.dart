@@ -72,8 +72,20 @@ class WechatFacePayment {
   }
 
   /// 人脸支付
-  static Future<Map<String, dynamic>> wxFacePay() async {
-    final Map<String, dynamic> result = await _channel.invokeMapMethod('wxFacePay');
+  static Future<Map<String, dynamic>> wxFacePay(
+      String merchantId, // 商户 id
+      String channelId, // 渠道 id
+      String orderTitle, // 支付显示标题
+      String outTradeNo, // 商户系统内部订单号，要求32个字符内，只能是数字、大小写字母_-|*且在同一个商户号下唯一
+      String totalFee //订单总金额，单位为分，只能为整数
+      ) async {
+    final Map<String, dynamic> result = await _channel.invokeMapMethod('wxFacePay', {
+      "merchant_id": merchantId,
+      "channel_id": channelId,
+      "order_title": orderTitle,
+      "out_trade_no": outTradeNo,
+      "total_fee": totalFee
+    });
     return result;
   }
 

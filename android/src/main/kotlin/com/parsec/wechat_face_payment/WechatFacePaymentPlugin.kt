@@ -6,10 +6,9 @@ import android.os.Looper
 import android.util.Log
 import androidx.annotation.NonNull
 import com.parsec.wechat_face_payment.handlers.WechatFacePaymentHandler
-import com.parsec.wxfacepay.utils.ICallback
 import com.parsec.wxfacepay.utils.LoggerUtil
 import com.parsec.wxfacepay.utils.WxFaceUtil
-import com.tencent.wxpayface.*
+import com.tencent.wxpayface.WxPayFace
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -21,34 +20,9 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 
 
 /** WechatFacePaymentPlugin */
-public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
     private val uiThreadHandler = Handler(Looper.getMainLooper())
-
-    private val PARAMS_FACE_AUTHTYPE = "face_authtype"
-    private val PARAMS_AUTH_CODE = "auth_code"
-    private val PARAMS_APPID = "appid"
-    private val PARAMS_SUB_APPID = "sub_appid"
-    private val PARAMS_MCH_ID = "mch_id"
-    private val PARAMS_MCH_NAME = "mch_name"
-    private val PARAMS_SUB_MCH_ID = "sub_mch_id"
-    private val PARAMS_NONCE_STR = "nonce_str"
-    private val PARAMS_SIGN = "sign"
-    private val PARAMS_SIGN_TYPE = "sign_type"
-    private val PARAMS_BODY = "body"
-    private val PARAMS_STORE_ID = "store_id"
-    private val PARAMS_AUTHINFO = "authinfo"
-    private val PARAMS_FACE_SID = "face_sid"
-    private val PARAMS_INFO_TYPE = "info_type"
-    private val PARAMS_OUT_TRADE_NO = "out_trade_no"
-    private val PARAMS_TOTAL_FEE = "total_fee"
-    private val PARAMS_TELEPHONE = "telephone"
-
-    /*
-     * 微信刷脸SDK返回常量
-     */
-    private val RETURN_CODE = "return_code"
-    private val RETURN_MSG = "return_msg"
 
     /*
     刷脸支付相关参数
@@ -110,7 +84,12 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
                 faceRecognition(result)
             }
             "wxFacePay" -> {
-                wxFacePay(result)
+                val merchant_id = call.argument<String>("merchant_id")!!
+                val channel_id = call.argument<String>("channel_id")!!
+                val order_title = call.argument<String>("order_title")!!
+                val out_trade_no = call.argument<String>("out_trade_no")!!
+                val total_fee = call.argument<String>("total_fee")!!
+                wxFacePay(result, merchant_id, channel_id, order_title, out_trade_no, total_fee);
             }
             "wxScanCode" -> {
                 wxScanCode(result)
@@ -162,52 +141,44 @@ public class WechatFacePaymentPlugin : FlutterPlugin, MethodCallHandler, Activit
      * 初始化人脸识别
      */
     private fun initWxpayface(@NonNull result: Result) {
-        WxFaceUtil.init(WechatFacePaymentHandler.getContext(), object : ICallback {
-            override fun callback(params: MutableMap<String, Any>?) {
-                uiThreadHandler.post {
-                    result.success(params)
-                }
+        WxFaceUtil.init(WechatFacePaymentHandler.getContext()) { params ->
+            uiThreadHandler.post {
+                result.success(params)
             }
-        })
+        }
     }
 
     /**
      * 人脸识别
      */
     private fun faceRecognition(@NonNull result: Result) {
-        WxFaceUtil.InfoVer(WechatFacePaymentHandler.getContext(), serverPath, object : ICallback {
-            override fun callback(params: MutableMap<String, Any>?) {
-                uiThreadHandler.post {
-                    result.success(params)
-                }
+        WxFaceUtil.InfoVer(WechatFacePaymentHandler.getContext(), serverPath) { params ->
+            uiThreadHandler.post {
+                result.success(params)
             }
-        })
+        }
     }
 
     /**
      * 支付
      */
-    private fun wxFacePay(@NonNull result: Result) {
-        WxFaceUtil.FacePay(WechatFacePaymentHandler.getContext(), serverPath, object : ICallback {
-            override fun callback(params: MutableMap<String, Any>?) {
-                uiThreadHandler.post {
-                    result.success(params)
-                }
+    private fun wxFacePay(@NonNull result: Result, merchant_id: String, channel_id: String, order_title: String, out_trade_no: String, total_fee: String) {
+        WxFaceUtil.FacePay(WechatFacePaymentHandler.getContext(), serverPath, merchant_id, channel_id, order_title, out_trade_no, total_fee) { params ->
+            uiThreadHandler.post {
+                result.success(params)
             }
-        })
+        }
     }
 
     /**
      * 扫码
      */
     private fun wxScanCode(@NonNull result: Result) {
-        WxFaceUtil.ScanCode(WechatFacePaymentHandler.getContext(), object : ICallback {
-            override fun callback(params: MutableMap<String, Any>?) {
-                uiThreadHandler.post {
-                    result.success(params)
-                }
+        WxFaceUtil.ScanCode(WechatFacePaymentHandler.getContext()) { params ->
+            uiThreadHandler.post {
+                result.success(params)
             }
-        })
+        }
     }
 
     /**

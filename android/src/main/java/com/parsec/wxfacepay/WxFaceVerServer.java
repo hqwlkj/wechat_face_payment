@@ -17,6 +17,8 @@ import com.tencent.wxpayface.IWxPayfaceCallback;
 import com.tencent.wxpayface.WxPayFace;
 import com.tencent.wxpayface.WxfacePayCommonCode;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -142,11 +144,16 @@ public class WxFaceVerServer {
             client.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(okhttp3.Call call, IOException e) {
+                    e.printStackTrace();
                     LoggerUtil.i("获取人脸凭证接口请求失败" + e.toString());
+                    FaceResult faceResult = new FaceResult();
+                    faceResult.setReturn_msg("获取人脸凭证接口请求失败：" + e.getMessage());
+                    faceResult.setReturn_code("ERROR");
+                    faceResultToH5(faceResult, callback);
                 }
 
                 @Override
-                public void onResponse(okhttp3.Call call, Response response) throws IOException {
+                public void onResponse(@NotNull okhttp3.Call call, @NotNull Response response) throws IOException {
                     String payVoucher = response.body().string();
                     LoggerUtil.i("获取到的微信支付凭证:" + payVoucher);
                     try {
@@ -295,152 +302,14 @@ public class WxFaceVerServer {
                 FaceResult faceResult = new FaceResult();
                 if (code.equals("SUCCESS")) {
                     LoggerUtil.i_file("获取face_sid成功");
+                    faceResult.setFace_sid(mapAuth.get(WxConstant.FACE_SID));
+                    faceResult.setOpenid(mapAuth.get(WxConstant.OPEN_ID));
                 } else if (code.equals("USER_CANCEL")) {
                     LoggerUtil.i_file("用户退出实名认证");
                 }
-                faceResult.setFace_sid(mapAuth.get(WxConstant.FACE_SID));
-                faceResult.setOpenid(mapAuth.get(WxConstant.OPEN_ID));
                 faceResult.setReturn_code(code);
                 faceResult.setReturn_msg(message);
                 faceResultToH5(faceResult, callback);
-            }
-        });
-    }
-
-
-
-    public void getWxpayfaceCode(final HashMap<String, String> hashmap, final ICallback callback) {
-        //打印Map
-        for (String key : hashmap.keySet()) {
-            String value = hashmap.get(key);
-            LoggerUtil.i("key:" + key + "   vaule:" + value);
-        }
-
-        WxPayFace.getInstance().getWxpayfaceCode(hashmap, new IWxPayfaceCallback() {
-            @Override
-            public void response(Map map) {
-                final String code = (String) map.get(WxConstant.RETURN_CODE);
-                String message = (String) map.get(WxConstant.RETURN_MSG);
-                LoggerUtil.i(code + "--" + message);
-                FaceResult faceResult = new FaceResult();
-                if (!Tools.isSuccessInfo(map)) {
-                    if (TextUtils.equals(code, WxfacePayCommonCode.VAL_RSP_PARAMS_USER_CANCEL)) {
-                        //用户取消
-                        LoggerUtil.e("刷脸失败：用户取消");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：用户取消");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else if (TextUtils.equals(code, WxfacePayCommonCode.VAL_RSP_PARAMS_SCAN_PAYMENT)) {
-                        //扫码支付
-                        LoggerUtil.e("刷脸失败--扫码支付");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：扫码支付");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else if (TextUtils.equals(code, "FACEPAY_NOT_AUTH")) {
-                        //无即时支付无权限
-                        LoggerUtil.e("刷脸失败--用户无即时支付无权限");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：用户无即时支付无权限");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else {
-                        //失败
-                        LoggerUtil.e("刷脸失败");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：其他");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    }
-                } else {
-                    if (TextUtils.equals(code, WxfacePayCommonCode.VAL_RSP_PARAMS_SUCCESS)) {
-                        if (map.get("face_authtype").equals("FACEPAY")) {
-                            String face_code = (String) map.get(WxConstant.FACE_CODE);
-                            String openid = (String) map.get(WxConstant.OPEN_ID);
-                            //刷脸成功
-                            faceResult.setFace_code(face_code);
-                            faceResult.setOpenid(openid);
-                            faceResult.setReturn_code("0");
-                            faceResult.setReturn_msg("刷脸成功");
-                            faceResult.setFace_type("2");
-                            faceResultToH5(faceResult, callback);
-                        } else if (map.get("face_authtype").equals("FACE_AUTH")) {
-                            String face_sid = (String) map.get(WxConstant.FACE_SID);
-                            String openid = (String) map.get(WxConstant.OPEN_ID);
-                            //刷脸成功
-                            faceResult.setFace_sid(face_sid);
-                            faceResult.setOpenid(openid);
-                            faceResult.setReturn_code("0");
-                            faceResult.setFace_type("3");
-                            faceResult.setReturn_msg("刷脸成功");
-                            faceResultToH5(faceResult, callback);
-
-                            //实名验证--授权
-                            HashMap<String, String> mapAuth = new HashMap<>();
-                            mapAuth.put("face_sid", face_sid);
-                            mapAuth.put("authinfo", (String) hashmap.get("authinfo"));
-                            getWxpayAuth(mapAuth, callback);
-                        }
-
-                    } else if (TextUtils.equals(code, WxfacePayCommonCode.VAL_RSP_PARAMS_USER_CANCEL)) {
-                        //用户取消
-                        LoggerUtil.e("刷脸失败：用户取消");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：用户取消");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else if (TextUtils.equals(code, WxfacePayCommonCode.VAL_RSP_PARAMS_SCAN_PAYMENT)) {
-                        //扫码支付
-                        LoggerUtil.e("刷脸失败--扫码支付");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：扫码支付");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else if (TextUtils.equals(code, "FACEPAY_NOT_AUTH")) {
-                        //无即时支付无权限
-                        LoggerUtil.e("刷脸失败--用户无即时支付无权限");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：用户无即时支付无权限");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    } else {
-                        //失败
-                        LoggerUtil.e("刷脸失败");
-                        faceResult.setReturn_code("-1");
-                        faceResult.setReturn_msg("刷脸失败：其他");
-                        faceResult.setFace_type("2");
-                        faceResultToH5(faceResult, callback);
-                    }
-                }
-
-            }
-
-        });
-
-    }
-
-    /**
-     * 实名验证--授权
-     */
-    private void getWxpayAuth(HashMap<String, String> mapAuth, final ICallback callback) {
-        for (String key : mapAuth.keySet()) {
-            String value = mapAuth.get(key);
-            LoggerUtil.i("key:" + key + "   vaule:" + value);
-        }
-        WxPayFace.getInstance().getWxpayAuth(mapAuth, new IWxPayfaceCallback() {
-            @Override
-            public void response(Map map) throws RemoteException {
-                final String code = (String) map.get(WxConstant.RETURN_CODE);
-                String message = (String) map.get(WxConstant.RETURN_MSG);
-                LoggerUtil.i_file(code);
-                LoggerUtil.i_file(message);
-                if (code.equals("SUCCESS")) {
-                    callback.callback(map);
-                } else if (code.equals("USER_CANCEL")) {
-                    callback.callback(map);
-                }
-
             }
         });
     }

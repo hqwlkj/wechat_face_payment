@@ -1,12 +1,12 @@
 name: wechat_face_payment
 description: 微信刷脸支付、刷脸认证、扫码支持等 Flutter 插件.
-version: 0.0.6+1
+version: 0.0.7+1
 author: Yanghc <hqwlkj@sina.com>
 homepage: https://github.com/hqwlkj/wechat_face_payment.git
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
-  flutter: ">=1.17.0 <2.0.0"
+  flutter: ">=2.5.0"
 
 dependencies:
   flutter:

@@ -3,6 +3,8 @@ package com.parsec.wxfacepay.utils;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.text.TextUtils;
 import android.util.Xml;
 
@@ -16,8 +18,13 @@ import org.xmlpull.v1.XmlPullParser;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.StringWriter;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +53,6 @@ public class Tools {
         if (context != null) return context;
         throw new NullPointerException("请前往JDSApplication中初始化Tools工具类");
     }
-
 
 
     public static String getString(int id) {
@@ -155,7 +161,6 @@ public class Tools {
     }
 
 
-
     public static String encode(String password) {
         try {
             MessageDigest digest = MessageDigest.getInstance("md5");
@@ -179,5 +184,36 @@ public class Tools {
     public static void copyToClipboard(Context context, String text) {
         ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
         cm.setPrimaryClip(ClipData.newPlainText("text", text));
+    }
+
+    /**
+     * 得到本机ip地址
+     * @return
+     */
+    public static String getLocalHostIp() {
+        String ipaddress = "";
+        try {
+            Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces();
+            // 遍历所用的网络接口
+            while (en.hasMoreElements()) {
+                NetworkInterface nif = en.nextElement();// 得到每一个网络接口绑定的所有ip
+                Enumeration<InetAddress> inet = nif.getInetAddresses();
+                // 遍历每一个接口绑定的所有ip
+                while (inet.hasMoreElements()) {
+                    InetAddress ip = inet.nextElement();
+//                    if (!ip.isLoopbackAddress() && InetAddressUtils.isIPv4Address(ip.getHostAddress())) {
+                    if (!ip.isLoopbackAddress() && ip instanceof Inet4Address) {
+                        ipaddress = ip.getHostAddress();
+                        return ipaddress;
+                    }
+                }
+
+            }
+        } catch (SocketException e) {
+            LoggerUtil.e("获取本地ip地址失败");
+            e.printStackTrace();
+        }
+        return ipaddress;
+
     }
 }
