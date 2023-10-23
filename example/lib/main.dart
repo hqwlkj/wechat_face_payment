@@ -65,12 +65,12 @@ class _MyAppState extends State<MyApp> {
   /// 人脸识别
   ///
   Future<void> wxFaceVerify() async {
-    final Map<String, dynamic> result = await WechatFacePayment.wxFaceVerify();
+    final Map? result = await WechatFacePayment.wxFaceVerify();
     print('==========wxFaceVerify=============');
     print(result);
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = '${result['code']}_${result['message']}';
+      _initFacePayMsg = '${result?['code']}_${result?['message']}';
     });
   }
 
@@ -78,7 +78,7 @@ class _MyAppState extends State<MyApp> {
   /// 面部支付
   ///
   Future<void> wxFacePay() async {
-    final Map<String, dynamic> result = await WechatFacePayment.wxFacePay(
+    final Map? result = await WechatFacePayment.wxFacePay(
         "332b3f18-8da7-4c90-8eba-b3785e417ffb",
         "UfMG4yYKusvYQffSP1xCLH10Ahqy0EZG",
         "测试面部支付",
@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> {
     print(result);
     if (!mounted) return;
     setState(() {
-      _initFacePayMsg = '${result['code']}_${result['message']}';
+      _initFacePayMsg = '${result?['code']}_${result?['message']}';
     });
   }
 
@@ -96,7 +96,7 @@ class _MyAppState extends State<MyApp> {
   /// 扫码
   ///
   Future<void> startScanCodeToPay() async {
-    final Map<String, dynamic> result = await WechatFacePayment.wxScanCode();
+    final Map? result = await WechatFacePayment.wxScanCode();
     print('===========startScanCodeToPay============');
     print(result);
     // 扫码结果返回后需要手动关闭扫码
@@ -143,7 +143,9 @@ class _MyAppState extends State<MyApp> {
               Text('Running on: $_initFacePayMsg\n'),
               TextButton(
                 style: ButtonStyle(
-                    backgroundColor: MaterialStateProperty.all(Colors.deepPurpleAccent[400]), foregroundColor: MaterialStateProperty.all(Colors.white)),
+                    backgroundColor:
+                        MaterialStateProperty.all(Colors.deepPurpleAccent[400]),
+                    foregroundColor: MaterialStateProperty.all(Colors.white)),
                 onPressed: () {
                   testWxPayFace();
                 },
